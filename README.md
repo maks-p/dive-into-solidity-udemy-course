@@ -1,9 +1,9 @@
 # Dive into Solidity Course
 
-This is the project repository for the Dive into Solidity Udemy course by Macro. 
-Please fork this repository to complete the two projects in the course locally. 
+### **NOTE**
+This is the forked, final test completed for the [Dive into Solidity Udemy Course](https://www.udemy.com/course/dive-into-solidity-smart-contract-development/) by Macro.
 
-All the normal hardhat tooling is available in this repository, such as `npx hardhat test` and `npx hardhat compile`.
+The original questions are below:
 
 ## Knowledge Test
 
