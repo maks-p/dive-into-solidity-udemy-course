@@ -8,39 +8,45 @@ contract Lottery {
     address[] public players; //dynamic array of type address payable
     address[] public gameWinners;
     address public owner;
+    uint256 constant ENTRANCE_FEE = 0.1 ether;
 
+    // declaring modifiers
+    modifier onlyOwner () {
+        require(msg.sender == owner, "ONLY_OWNER");
+        _;
+    }
     // declaring the constructor
     constructor() {
-        // TODO: initialize the owner to the address that deploys the contract
+        owner = msg.sender;
     }
 
     // declaring the receive() function that is necessary to receive ETH
     receive() external payable {
-        // TODO: require each player to send exactly 0.1 ETH
-        // TODO: append the new player to the players array
+        require(msg.value == ENTRANCE_FEE, "ENTRANCE_FEE_INCORRECT");
+        players.push(msg.sender);
     }
 
     // returning the contract's balance in wei
-    function getBalance() public view returns (uint256) {
-        // TODO: restrict this function so only the owner is allowed to call it
-        // TODO: return the balance of this address
+    function getBalance() public view onlyOwner returns (uint256) {
+        return address(this).balance;
     }
 
     // selecting the winner
-    function pickWinner() public {
-        // TODO: only the owner can pick a winner 
-        // TODO: owner can only pick a winner if there are at least 3 players in the lottery
+    function pickWinner() public onlyOwner {
+        require(players.length >= 3, "NOT_ENOUGH_PLAYERS");
 
         uint256 r = random();
         address winner;
 
-        // TODO: compute an unsafe random index of the array and assign it to the winner variable 
+        uint256 randomIdx = r % players.length;
+        winner = players[randomIdx]; 
 
-        // TODO: append the winner to the gameWinners array
+        gameWinners.push(winner);
 
-        // TODO: reset the lottery for the next round
+        delete players;
 
-        // TODO: transfer the entire contract's balance to the winner
+        (bool success, ) = winner.call{value: address(this).balance}("");
+        require(success, "BALANCE_NOT_TRANSFERRED");
     }
 
     // helper function that returns a big random integer
@@ -57,5 +63,10 @@ contract Lottery {
                     )
                 )
             );
+    }
+
+    // getter that returns number of players
+    function getNumberPlayers() public view returns (uint256) {
+        return players.length;
     }
 }

@@ -81,5 +81,35 @@ describe("Lottery Contract", function () {
       // With hardhat, by default, all test signers have 10000 ETH, so we check if the winner has more than that
       expect(winnerBalance.gt(BigNumber.from(parseEther("10000")))).to.be.true;
     });
+
+    it("Sets proper array length and resets the array after picking and paying a winner", async () => {
+      const NUM_PLAYERS = 5;
+
+      for (let i = 0; i < NUM_PLAYERS; i++) {
+        await addrs[i].sendTransaction({
+          to: lottery.address,
+          value: parseEther("0.1"),
+        });
+      }
+
+      // The array should be NUM_PLAYERS long
+      expect(await lottery.getNumberPlayers()).to.equal(NUM_PLAYERS);
+
+      // Picking winners
+      await lottery.pickWinner();
+      const winner = await lottery.gameWinners(0);
+
+      // The winner should be one of the 4 players
+      expect(
+        addrs.slice(0, NUM_PLAYERS).map((player) => player.address)
+      ).to.include(winner);
+
+      const winnerBalance = await provider.getBalance(winner);
+      // With hardhat, by default, all test signers have 10000 ETH, so we check if the winner has more than that
+      expect(winnerBalance.gt(BigNumber.from(parseEther("10000")))).to.be.true;
+
+      // The array should have a length of 0 after the lottery was reset
+      expect(await lottery.getNumberPlayers()).to.equal(0);
+    });
   });
 });
